@@ -1,0 +1,4 @@
+num = "01"
+for _ in range(int(input("enter: "))):
+  num = num[:-1] + num + "1"
+print(num)
