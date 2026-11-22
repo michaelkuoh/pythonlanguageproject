@@ -1,0 +1,38 @@
+golay = [
+  "100111110001",
+  "010011111010",
+  "001001111101",
+  "100100111110",
+  "110010011101",
+  "111001001110",
+  "111100100101",
+  "111110010010",
+  "011111001001",
+  "001111100110",
+  "010101010111",
+  "101010101011"
+]
+
+input = input("enter: ")
+while len(input) % 12 != 0:
+    input += "0"
+things = []
+for h in range(0, len(input), 12):
+    things.append(input[h:h + 12])
+
+newthings = []
+for thing in things:
+    new = thing
+    n = []
+    for i in range(12):
+        if thing[i] == "1":
+            n.append(golay[i])
+    for j in range(12):
+        k = 0
+        for m in n:
+            k += int(m[j])
+        new += str(k % 2)
+    newthings.append(new)
+
+for thing in newthings:
+    print(thing)
