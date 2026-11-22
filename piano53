@@ -1,0 +1,25 @@
+import numpy as np
+import soundfile as sf
+
+samplelen = 28746
+path = "encoded.txt"
+with open(path, "r") as file:
+    sample = file.read()
+desiredlen = len(sample) + 480 - len(sample) % 480
+sample = sample.ljust(desiredlen, "0")
+strings = []
+for i in range(0, desiredlen, 480):
+    strings.append(sample[i:i+480])
+
+fulldata = np.array([])
+for string in strings:
+    chord = np.zeros(samplelen)
+    for i in range(480):
+        if string[i] == "1":
+            newdata, samplerate = sf.read("note" + str(i) + ".mp3")
+            chord += newdata
+    fulldata = np.concatenate((fulldata, chord))
+    #create a piece of the array depending on number
+    #add to the array
+
+sf.write("chords1.mp3", fulldata, samplerate)
