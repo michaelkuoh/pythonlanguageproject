@@ -1,0 +1,133 @@
+import numpy as np
+import random
+
+golayA = [
+ "100111110001",
+ "010011111010",
+ "001001111101",
+ "100100111110",
+ "110010011101",
+ "111001001110",
+ "111100100101",
+ "111110010010",
+ "011111001001",
+ "001111100110",
+ "010101010111",
+ "101010101011"
+]
+
+golayI = []
+for i in range(1, 13):
+   iden = ""
+   for j in range(1, 13):
+       if j == i:
+           iden += "1"
+       else:
+           iden += "0"
+   golayI.append(iden)
+
+golayH = []
+for i in range(12):
+   entry = golayI[i] + golayA[i]
+   sub = []
+   for c in entry:
+       sub.append(int(c))
+   golayH.append(sub)
+h = np.array(golayH)
+
+def syndrome(received):
+   temp1 = []
+   for c in received:
+       temp1.append(int(c))
+   r = np.array(temp1)
+   rT = np.zeros((24, 1))
+   for i in range(24):
+       rT[i, 0] = int(r[i])
+   synT = np.array(h @ rT)
+   for i in range(12):
+       synT[i, 0] = synT[i, 0] % 2
+   syn = np.zeros(12)
+   for i in range(12):
+       syn[i] = synT[i, 0]
+   return(syn.astype(int))
+
+def gf2(the_array):
+   for i in range(len(the_array)):
+       the_array[i] = the_array[i] % 2
+   return the_array.astype(int)
+
+def weight(the_array):
+   count = 0
+   for i in the_array:
+       count += i
+   return(count)
+
+def arrayer(the_string):
+   a = np.zeros(len(the_string))
+   for i in range(len(the_string)):
+       a[i] = the_string[i]
+   a = a.astype(int)
+   return(a)
+
+def unarrayer(the_array):
+   a = ""
+   for i in the_array:
+       a += str(i)
+   return(a)
+
+def error(syn):
+   aj = np.zeros((12, 12))
+   for i in range(12):
+       aj[i] = arrayer(golayA[i])
+   aj = aj.astype(int)
+   error1 = ""
+   error2 = ""
+   synA = gf2(syn @ aj)
+   if weight(syn) <= 3:
+       print("case 1")
+       error1 = unarrayer(syn)
+       error2 = "000000000000"
+   else:
+       for i in range(12):
+           s_new = gf2(syn + arrayer(golayA[i]))
+           if weight(s_new) <= 2:
+               print("case " + str(i + 2))
+               error1 = unarrayer(s_new)
+               error2 = golayI[i]
+   if weight(synA) <= 3:
+       print("case 14")
+       error1 = "000000000000"
+       error2 = unarrayer(synA)
+   else:
+       for i in range(12):
+           s_new = gf2(synA + arrayer(golayA[i]))
+           if weight(s_new) <= 2:
+               print("case " + str(i + 15))
+               error2 = unarrayer(s_new)
+               error1 = golayI[i]
+   error = error1 + error2
+   return(error)
+
+received = input("enter size 24 encoded string: ")
+syn = syndrome(received)
+e = error(syn)
+if e == "":
+   n = random.randint(0, 23)
+   received2 = ""
+   for i in range(24):
+       if i != n:
+           received2 += received[i]
+       elif received[i] == "0":
+           received2 += "1"
+       else:
+           received2 += "0"
+   received = received2
+   syn = syndrome(received)
+   e = error(syn)
+
+def codeword(received, e):
+   received_array = arrayer(received)
+   error_array = arrayer(e)
+   return unarrayer(gf2(received_array + error_array))
+
+print(codeword(received, e))
